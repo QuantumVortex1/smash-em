@@ -60,9 +60,13 @@ export class BaseMonster extends Phaser.GameObjects.Rectangle {
     }
   }
 
-  takeDamage(amount: number) {
+  takeDamage(amount: number): boolean {
     this.hp -= amount;
-    if (this.hp <= 0) this.die();
+    if (this.hp <= 0) {
+      this.die();
+      return true;
+    }
+    return false;
   }
 
   die() {
