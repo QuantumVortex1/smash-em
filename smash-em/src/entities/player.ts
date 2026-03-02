@@ -11,6 +11,10 @@ export class Player extends Phaser.GameObjects.Rectangle {
     scene.physics.add.existing(this);
     this.body.setCollideWorldBounds(true);
 
+    this.body.setMaxVelocity(300, 1500);
+    this.body.setDragX(1500);
+    this.body.setBounceY(0.2);
+
     if (scene.input.keyboard) {
       this.cursors = scene.input.keyboard.createCursorKeys();
       this.wasd = scene.input.keyboard.addKeys('W,A,S,D');
@@ -20,12 +24,19 @@ export class Player extends Phaser.GameObjects.Rectangle {
   }
 
   update() {
-    const speed = 300;
+    const acceleration = 3000;
+    const deacceleration = 300;
     const jumpForce = -800;
 
-    if (this.cursors.left.isDown || this.wasd.A.isDown) this.body.setVelocityX(-speed);
-    else if (this.cursors.right.isDown || this.wasd.D.isDown) this.body.setVelocityX(speed);
-    else this.body.setVelocityX(0);
+    if (this.cursors.left.isDown || this.wasd.A.isDown) this.body.setAccelerationX(-acceleration);
+    else if (this.cursors.right.isDown || this.wasd.D.isDown) this.body.setAccelerationX(acceleration);
+    else {
+        if (this.body.acceleration.x > 0) {
+            this.body.setAccelerationX(Math.max(this.body.acceleration.x - deacceleration, 0));
+        } else if (this.body.acceleration.x < 0) {
+            this.body.setAccelerationX(Math.min(this.body.acceleration.x + deacceleration, 0));
+        }
+    }
 
     if ((this.cursors.up.isDown || this.cursors.space.isDown || this.wasd.W.isDown) && this.body.touching.down) {
       this.body.setVelocityY(jumpForce);
