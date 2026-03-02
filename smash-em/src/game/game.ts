@@ -101,11 +101,19 @@ export class MainScene extends Phaser.Scene {
     this.hpBarFill.width = 200 * hpPercent;
     this.hpText.setText(`${this.player.hp} / ${this.player.maxHp} HP`);
 
-    const xpPercent = Math.max(0, this.player.xp / this.player.maxXp);
+    const nextLevelReq = this.player.currentLevelStartXp + (this.player.baseNextLevelXp * this.player.xpReqFactor);
+    const currentProgress = this.player.totalXp - this.player.currentLevelStartXp;
+    const requiredForCurrentLevel = nextLevelReq - this.player.currentLevelStartXp;
+    
+    const xpPercent = Math.max(0, Math.min(1, currentProgress / requiredForCurrentLevel));
     this.xpBarFill.width = 200 * xpPercent;
-    this.xpText.setText(`${this.player.xp} / ${this.player.maxXp} XP`);
+    this.xpText.setText(`${Math.floor(this.player.totalXp)} / ${Math.floor(nextLevelReq)} XP`);
 
     this.levelText.setText(`Lvl ${this.player.level}`);
+  }
+
+  public gameOver(finalScore: number) {
+    this.scene.start('MenuScene', { score: finalScore });
   }
 
   private spawnFloatingText(x: number, y: number, message: string, color: string) {

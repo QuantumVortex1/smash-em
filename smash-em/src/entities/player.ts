@@ -7,8 +7,9 @@ export class Player extends Phaser.GameObjects.Rectangle {
 
     public hp: number = 20;
     public maxHp: number = 20;
-    public xp: number = 0;
-    public maxXp: number = 10;
+    public totalXp: number = 0;
+    public currentLevelStartXp: number = 0;
+    public baseNextLevelXp: number = 10;
     public level: number = 1;
 
     public damage: number = 1;
@@ -81,7 +82,7 @@ export class Player extends Phaser.GameObjects.Rectangle {
 
         this.hp -= amount;
         if (this.hp <= 0) {
-            this.scene.scene.restart();
+            (this.scene as any).gameOver(this.totalXp);
             return true;
         }
         this.scene.cameras.main.shake(150, 0.015);
@@ -111,12 +112,12 @@ export class Player extends Phaser.GameObjects.Rectangle {
     }
 
     gainXp(amount: number) {
-        this.xp += amount;
-        while (this.xp >= this.maxXp * this.xpReqFactor) {
-            this.xp -= this.maxXp * this.xpReqFactor;
-            this.xp = Math.round(this.xp * 100) / 100;
+        this.totalXp += amount;
+        
+        while (this.totalXp >= this.currentLevelStartXp + (this.baseNextLevelXp * this.xpReqFactor)) {
+            this.currentLevelStartXp += (this.baseNextLevelXp * this.xpReqFactor);
             this.level++;
-            this.maxXp = Math.floor(this.maxXp * 1.5);
+            this.baseNextLevelXp = Math.floor(this.baseNextLevelXp * 1.5);
 
             this.scene.cameras.main.flash(250, 255, 255, 255);
 
