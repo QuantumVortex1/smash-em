@@ -5,6 +5,8 @@ export class Player extends Phaser.GameObjects.Rectangle {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd: any;
 
+  public hp: number = 20;
+
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 40, 40, 0xff4444);
     scene.add.existing(this);
@@ -41,6 +43,27 @@ export class Player extends Phaser.GameObjects.Rectangle {
     if ((this.cursors.up.isDown || this.cursors.space.isDown || this.wasd.W.isDown) && this.body.touching.down) {
       this.body.setVelocityY(jumpForce);
     }
+  }
+
+  takeDamage(amount: number) {
+    this.hp -= amount;
+    if (this.hp <= 0) {
+      this.scene.scene.restart();
+      return;
+    }
+
+    this.scene.tweens.add({
+      targets: this,
+      alpha: 0.2,
+      duration: 100,
+      yoyo: true,
+      repeat: 3,
+      onComplete: () => { 
+        this.alpha = 1; 
+      }
+    });
+
+    this.body.setVelocityY(-350);
   }
 }
 

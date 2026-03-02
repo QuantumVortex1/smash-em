@@ -1,9 +1,12 @@
 import * as Phaser from 'phaser';
 import { Player } from '../entities/player';
+import { BaseMonster, BasicSlime } from '../entities/monster';
 
 export class MainScene extends Phaser.Scene {
   private player!: Player;
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
+  private monsters!: Phaser.Physics.Arcade.Group;
+  private monsterSpawnTimer: number = 0;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -20,11 +23,42 @@ export class MainScene extends Phaser.Scene {
 
     this.player = new Player(this, 380, 200);
 
+    this.monsters = this.physics.add.group({
+      runChildUpdate: true 
+    });
+
     this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.monsters, this.platforms);
+
+    this.physics.add.overlap(this.player, this.monsters, this.handlePlayerMonsterCollision as any, undefined, this);
   }
 
-  update() {
+  update(time: number, delta: number) {
     this.player.update();
+
+    this.monsterSpawnTimer -= delta;
+    if (this.monsterSpawnTimer <= 0) {
+      this.spawnMonster();
+      this.monsterSpawnTimer = 500 + Math.random() * 1000;
+    }
+  }
+
+  private spawnMonster() {
+    const spawnX = Math.random() > 0.5 ? 50 : 750;
+    const spawnY = 100;
+
+    const monster = new BasicSlime(this, spawnX, spawnY, this.player);
+    this.monsters.add(monster);
+  }
+
+  private handlePlayerMonsterCollision(player: Player, monster: BaseMonster) {
+    if (player.body.velocity.y > 0 && player.body.bottom <= monster.body.top + 20) {
+      monster.takeDamage(1);
+      player.body.setVelocityY(-400); 
+    } else {
+      player.takeDamage(monster.damage);
+      monster.die();
+    }
   }
 }
 
