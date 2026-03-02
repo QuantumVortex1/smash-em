@@ -6,6 +6,10 @@ export class Player extends Phaser.GameObjects.Rectangle {
   private wasd: any;
 
   public hp: number = 20;
+  public maxHp: number = 20;
+  public xp: number = 0;
+  public maxXp: number = 10;
+  public level: number = 1;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 40, 40, 0xff4444);
@@ -45,12 +49,13 @@ export class Player extends Phaser.GameObjects.Rectangle {
     }
   }
 
-  takeDamage(amount: number) {
+takeDamage(amount: number): boolean {
     this.hp -= amount;
     if (this.hp <= 0) {
       this.scene.scene.restart();
-      return;
+      return true;
     }
+    this.scene.cameras.main.shake(150, 0.005);
 
     this.scene.tweens.add({
       targets: this,
@@ -58,12 +63,25 @@ export class Player extends Phaser.GameObjects.Rectangle {
       duration: 100,
       yoyo: true,
       repeat: 3,
-      onComplete: () => { 
-        this.alpha = 1; 
+      onComplete: () => {
+        this.alpha = 1;
       }
     });
 
     this.body.setVelocityY(-350);
+    return true;
+  }
+
+  gainXp(amount: number) {
+    this.xp += amount;
+    if (this.xp >= this.maxXp) {
+      this.xp = 0;
+      this.level++;
+      this.hp = Math.min(this.maxHp, Math.round(this.hp * 1.5));
+      this.maxXp = Math.floor(this.maxXp * 1.5);
+      
+      this.scene.cameras.main.flash(250, 255, 255, 255);
+    }
   }
 }
 
