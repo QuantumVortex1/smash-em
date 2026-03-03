@@ -266,7 +266,7 @@ export class MainScene extends Phaser.Scene {
 
       if (player.hasResetBounces) player.jumpsLeft = player.maxJumps;
       
-      player.body.setVelocityY(-650);
+      player.body.setVelocityY(player.bounceBoost);
 
     } else if (player.body.velocity.y <= 0 && isAboveMonster) {
       return;

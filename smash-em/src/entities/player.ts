@@ -18,6 +18,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     public acceleration: number = 3000;
     public maxJumps: number = 1;
     public jumpsLeft: number = 1;
+    public bounceBoost: number = -650;
 
     public hasBloodthirst: boolean = false;
     public hasResetBounces: boolean = false;

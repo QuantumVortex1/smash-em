@@ -52,6 +52,13 @@ export const allUpgrades: Upgrade[] = [
             p.hp = Math.min(p.maxHp, p.hp + 6);
         }
     },
+    {
+        id: 'bounce-boost',
+        name: 'Bounce Boost',
+        description: 'Pralle höher ab, wenn du auf Gegner springst',
+        rarity: 'common',
+        apply: (p) => { p.bounceBoost -= 30; },
+    },
 
     // One Time
     {
