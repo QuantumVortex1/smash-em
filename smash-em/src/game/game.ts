@@ -508,26 +508,27 @@ export class MainScene extends Phaser.Scene {
     overlayGroup.add(title);
 
     const selectUpgrade = (index: number) => {
+      if (!this.physics.world.isPaused) return;
       if (!upgrades[index]) return;
       upgrades[index].apply(this.player);
 
-      this.input.keyboard?.removeKey('ONE');
-      this.input.keyboard?.removeKey('TWO');
-      this.input.keyboard?.removeKey('THREE');
-      this.input.keyboard?.removeKey('NUMPAD_ONE');
-      this.input.keyboard?.removeKey('NUMPAD_TWO');
-      this.input.keyboard?.removeKey('NUMPAD_THREE');
+      this.input.keyboard?.off('keydown-ONE');
+      this.input.keyboard?.off('keydown-TWO');
+      this.input.keyboard?.off('keydown-THREE');
+      this.input.keyboard?.off('keydown-NUMPAD_ONE');
+      this.input.keyboard?.off('keydown-NUMPAD_TWO');
+      this.input.keyboard?.off('keydown-NUMPAD_THREE');
 
       overlayGroup.clear(true, true);
       this.physics.resume();
     };
 
-    this.input.keyboard?.once('keydown-ONE', () => selectUpgrade(0));
-    this.input.keyboard?.once('keydown-TWO', () => selectUpgrade(1));
-    this.input.keyboard?.once('keydown-THREE', () => selectUpgrade(2));
-    this.input.keyboard?.once('keydown-NUMPAD_ONE', () => selectUpgrade(0));
-    this.input.keyboard?.once('keydown-NUMPAD_TWO', () => selectUpgrade(1));
-    this.input.keyboard?.once('keydown-NUMPAD_THREE', () => selectUpgrade(2));
+    this.input.keyboard?.on('keydown-ONE', () => selectUpgrade(0));
+    this.input.keyboard?.on('keydown-TWO', () => selectUpgrade(1));
+    this.input.keyboard?.on('keydown-THREE', () => selectUpgrade(2));
+    this.input.keyboard?.on('keydown-NUMPAD_ONE', () => selectUpgrade(0));
+    this.input.keyboard?.on('keydown-NUMPAD_TWO', () => selectUpgrade(1));
+    this.input.keyboard?.on('keydown-NUMPAD_THREE', () => selectUpgrade(2));
 
     upgrades.forEach((upgrade, index) => {
       const x = 200 + (index * 200);
