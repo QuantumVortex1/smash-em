@@ -19,6 +19,10 @@ export class MainScene extends Phaser.Scene {
   private levelText!: Phaser.GameObjects.Text;
   private monsterSpawnIndex: number = 0;
 
+  private consecutiveBounces: number = 0;
+  private killStreak: number = 0;
+  private lastKillTime: number = 0;
+
   constructor() {
     super({ key: 'MainScene' });
   }
@@ -51,7 +55,7 @@ export class MainScene extends Phaser.Scene {
     });
 
     const monsterKeys = [
-      'bloodshot-eye', 'ocular-watcher', 'ochre-jelly', 
+      'bloodshot-eye', 'ocular-watcher', 'ochre-jelly',
       'death-slime', 'murky-slaad', 'crimson-slaad'
     ];
 
@@ -126,6 +130,10 @@ export class MainScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (this.physics.world.isPaused) return;
 
+    if (this.player.body.blocked.down || (this.player.body.touching.down && this.player.body.velocity.y === 0)) {
+      this.consecutiveBounces = 0;
+    }
+
     if (this.player.pendingLevelUps > 0) {
       this.player.pendingLevelUps--;
       this.showUpgradeScreen();
@@ -152,7 +160,7 @@ export class MainScene extends Phaser.Scene {
     const nextLevelReq = this.player.currentLevelStartXp + (this.player.baseNextLevelXp * this.player.xpReqFactor);
     const currentProgress = this.player.totalXp - this.player.currentLevelStartXp;
     const requiredForCurrentLevel = nextLevelReq - this.player.currentLevelStartXp;
-    
+  
     const xpPercent = Math.max(0, Math.min(1, currentProgress / requiredForCurrentLevel));
     this.xpBarFill.width = 200 * xpPercent;
     this.xpText.setText(`${Math.floor(this.player.totalXp)} / ${Math.floor(nextLevelReq)} XP`);
@@ -189,11 +197,11 @@ export class MainScene extends Phaser.Scene {
     const spawnY = 100;
 
     const MonsterTypes = [
-      BloodshotEye, 
-      OcularWatcher, 
-      OchreJelly, 
-      DeathSlime, 
-      MurkySlaad, 
+      BloodshotEye,
+      OcularWatcher,
+      OchreJelly,
+      DeathSlime,
+      MurkySlaad,
       CrimsonSlaad
     ];
 
@@ -205,44 +213,81 @@ export class MainScene extends Phaser.Scene {
     this.monsterSpawnIndex = (this.monsterSpawnIndex + 1) % MonsterTypes.length;
   }
 
-    private handlePlayerMonsterCollision(player: Player, monster: BaseMonster) {
+  private awardXP(baseXp: number, isKill: boolean, textX: number, textY: number) {
+    let finalXp = baseXp;
+
+    let airMult = 1.0;
+    if (this.consecutiveBounces >= 3) {
+      airMult = 1.0 + (this.consecutiveBounces - 2) * 0.1;
+      finalXp *= airMult;
+    }
+
+    let killMult = 1;
+    if (isKill) {
+      const now = this.time.now;
+      if (now - this.lastKillTime < 250) {
+        this.killStreak++;
+      } else {
+        this.killStreak = 1;
+      }
+      this.lastKillTime = now;
+      killMult = this.killStreak;
+      finalXp *= killMult;
+    }
+
+    finalXp = Math.floor(finalXp);
+    this.player.gainXp(finalXp);
+
+    this.spawnFloatingText(textX, textY - 40, `+${finalXp} XP`, '#aaffaa');
+
+    let yOffset = 60;
+    if (airMult > 1.0) {
+      this.spawnFloatingText(textX, textY - yOffset, `COMBO x${airMult.toFixed(1)}`, '#00ffff');
+      yOffset += 20;
+    }
+    if (killMult > 1) {
+      this.spawnFloatingText(textX, textY - yOffset, `${killMult}x KILL!`, '#ff22ff');
+    }
+  }
+
+  private handlePlayerMonsterCollision(player: Player, monster: BaseMonster) {
     if (!monster.active || !player.active) return;
 
     const isFallingOrMonsterJumping = (player.body.velocity.y - monster.body.velocity.y) > 0;
     const isJustBounced = this.time.now - this.lastBounceTime < 50;
-    
+
     const isAboveMonster = player.body.bottom < (monster.y + 10);
 
     if ((isFallingOrMonsterJumping || isJustBounced) && isAboveMonster) {
+      if (this.time.now - this.lastBounceTime >= 50) this.consecutiveBounces++;
+
       this.lastBounceTime = this.time.now;
       const isCrit = Math.random() < player.critChance;
       const cachedFallSpeed = Math.abs(player.body.velocity.y);
       const damageDealt = (isCrit ? player.damage * player.critMultiplier : player.damage) * player.getSpeedDamageMultiplier(cachedFallSpeed);
-      const roundedDmg = Math.max(1, Math.round(damageDealt*10)/10);
+      const roundedDmg = Math.max(1, Math.round(damageDealt * 10) / 10);
 
       const color = isCrit ? '#ffaa00' : '#ffffff';
       const killed = monster.takeDamage(roundedDmg);
       if (killed) this.spawnFloatingText(monster.x, monster.y, 'KILL!', '#ff4444');
-      
+
       if (!killed && monster.active && monster.body) monster.body.setVelocityY(800);
-      
+
       this.spawnFloatingText(monster.x, monster.y - 20, `-${roundedDmg}${isCrit ? ' CRIT!' : ''}`, color);
-      
+
       let xpGained = killed ? monster.killXP : 1;
       if (player.hasXpFromDamage) xpGained += roundedDmg / 2;
 
-      player.gainXp(xpGained);
-      this.spawnFloatingText(player.x, player.y - 40, `+${xpGained} XP`, '#aaffaa');
-
+      this.awardXP(xpGained, killed, player.x, player.y);
 
       if (player.hasBloodthirst && killed) {
         player.heal(1);
-        this.spawnFloatingText(player.x, player.y - 60, '+1 HP', '#00ff00');
+        this.spawnFloatingText(player.x, player.y - 120, '+1 HP', '#00ff00');
       }
 
       if (player.hasGroundSlam) {
-        const aoeRadius = 30 + (cachedFallSpeed * 0.11); 
-        
+        const aoeRadius = 30 + (cachedFallSpeed * 0.11);
+
         const shockwave = this.add.ellipse(player.x, player.y + 15, aoeRadius * 2, aoeRadius * 0.3, 0xffaa00, 0.6);
         shockwave.setScale(0.01);
         this.tweens.add({
@@ -259,14 +304,20 @@ export class MainScene extends Phaser.Scene {
           const m = c as BaseMonster;
           if (m !== monster && Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y) <= aoeRadius) {
             const aoeDmg = Math.round(player.getSpeedDamageMultiplier(cachedFallSpeed) * 10) / 10;
-            m.takeDamage(aoeDmg);
+            const aoeKilled = m.takeDamage(aoeDmg);
             this.spawnFloatingText(m.x, m.y - 20, `-${aoeDmg} AOE`, '#ff8800');
+
+            let aoeXp = aoeKilled ? Math.max(1, m.killXP) : 0;
+            if (player.hasXpFromDamage) aoeXp += aoeDmg / 2;
+            if (aoeXp > 0) {
+              this.awardXP(aoeXp, aoeKilled, m.x, m.y);
+            }
           }
         });
       }
 
       if (player.hasResetBounces) player.jumpsLeft = player.maxJumps;
-      
+
       player.body.setVelocityY(player.bounceBoost);
 
     } else if (player.body.velocity.y <= 0 && isAboveMonster) {
@@ -284,7 +335,7 @@ export class MainScene extends Phaser.Scene {
     this.physics.pause();
 
     const upgrades = getRandomUpgrades(this.player, 3);
-    
+
     const overlayGroup = this.add.group();
 
     const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setScrollFactor(0);
@@ -297,7 +348,7 @@ export class MainScene extends Phaser.Scene {
       stroke: '#000000',
       strokeThickness: 6
     }).setOrigin(0.5).setScrollFactor(0);
-    
+
     overlayGroup.add(overlay);
     overlayGroup.add(title);
 
@@ -308,7 +359,7 @@ export class MainScene extends Phaser.Scene {
       const cardContainer = this.add.container(x, y).setScrollFactor(0);
 
       const borderColor = upgrade.rarity === 'rare' ? 0xffbb00 : upgrade.rarity === 'onetime' ? 0xaa22ff : 0xffffff;
-      
+
       const cardBg = this.add.rectangle(0, 0, 180, 240, 0x222222).setInteractive({ useHandCursor: true });
       cardBg.setStrokeStyle(4, borderColor);
 
@@ -343,7 +394,7 @@ export class MainScene extends Phaser.Scene {
       cardBg.on('pointerdown', () => {
         upgrade.apply(this.player);
 
-        overlayGroup.clear(true, true); 
+        overlayGroup.clear(true, true);
         this.physics.resume();
       });
     });
