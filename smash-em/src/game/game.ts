@@ -93,9 +93,13 @@ export class MainScene extends Phaser.Scene {
     this.gameTimeSeconds = 0;
   }
 
+  private uiContainer!: Phaser.GameObjects.Container;
+
   private createUI() {
-    this.add.rectangle(18, 18, 204, 24, 0x000000).setOrigin(0, 0).setScrollFactor(0);
-    this.add.rectangle(18, 48, 204, 19, 0x000000).setOrigin(0, 0).setScrollFactor(0);
+    this.uiContainer = this.add.container(0, 0);
+
+    const hpBgBorder = this.add.rectangle(18, 18, 204, 24, 0x000000).setOrigin(0, 0).setScrollFactor(0);
+    const xpBgBorder = this.add.rectangle(18, 48, 204, 19, 0x000000).setOrigin(0, 0).setScrollFactor(0);
 
     this.hpBarBg = this.add.rectangle(20, 20, 200, 20, 0x550000).setOrigin(0, 0).setScrollFactor(0);
     this.hpBarFill = this.add.rectangle(20, 20, 200, 20, 0xff2222).setOrigin(0, 0).setScrollFactor(0);
@@ -128,6 +132,13 @@ export class MainScene extends Phaser.Scene {
       strokeThickness: 4,
       fontStyle: 'bold'
     }).setScrollFactor(0);
+
+    this.uiContainer.add([
+      hpBgBorder, xpBgBorder, 
+      this.hpBarBg, this.hpBarFill, this.hpText, 
+      this.xpBarBg, this.xpBarFill, this.xpText, 
+      this.levelText
+    ]);
   }
 
   update(time: number, delta: number) {
@@ -176,7 +187,48 @@ export class MainScene extends Phaser.Scene {
   }
 
   public gameOver(finalScore: number) {
-    this.scene.start('MenuScene', { score: finalScore });
+    this.physics.pause();
+    this.player.setTint(0xff0000);
+    this.player.body.enable = false;
+
+    if (this.uiContainer) this.uiContainer.setVisible(false);
+
+    this.cameras.main.shake(500, 0.03);
+    this.cameras.main.stopFollow();
+    this.cameras.main.pan(this.player.x, this.player.y, 1000, 'Power2');
+    this.cameras.main.zoomTo(2.5, 1000, 'Power2');
+
+    const overlay = this.add.rectangle(this.player.x, this.player.y, 800 * 2, 600 * 2, 0xff0000, 0);
+    this.tweens.add({
+      targets: overlay,
+      alpha: 0.3,
+      duration: 500
+    });
+
+    const title = this.add.text(this.player.x, this.player.y - 40, 'GAME OVER', {
+      fontSize: '32px',
+      fontFamily: 'Impact',
+      color: '#ff0000',
+      stroke: '#000000',
+      strokeThickness: 5
+    }).setOrigin(0.5).setAlpha(0).setScale(0.5);
+
+    this.tweens.add({
+      targets: [title],
+      alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 800,
+      ease: 'Bounce.easeOut',
+      onComplete: () => {
+        this.time.delayedCall(1500, () => {
+          this.cameras.main.fadeOut(800, 0, 0, 0);
+          this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+            this.scene.start('MenuScene', { score: finalScore });
+          });
+        });
+      }
+    });
   }
 
   private spawnFloatingText(x: number, y: number, message: string, color: string) {
@@ -339,10 +391,10 @@ export class MainScene extends Phaser.Scene {
     } else if (player.body.velocity.y <= 0 && isAboveMonster) {
       return;
     } else {
-      const damage = monster.damage || 1;
-      if (player.takeDamage(damage)) {
-        this.spawnFloatingText(player.x, player.y - 20, `-${damage} HP`, '#ff4444');
-      }
+      const damage = monster.damage || 1;      
+      if (!player.isInvulnerable) this.spawnFloatingText(player.x, player.y - 20, `-${damage} HP`, '#ff4444');
+      player.takeDamage(damage);
+      
       monster.die();
     }
   }

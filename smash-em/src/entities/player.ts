@@ -30,7 +30,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     public xpReqFactor: number = 1;
     public hasSpeedDmgMult: boolean = false;
 
-    private isInvulnerable: boolean = false;
+    public isInvulnerable: boolean = false;
     public pendingLevelUps: number = 0;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
