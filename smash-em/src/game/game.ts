@@ -222,13 +222,14 @@ export class MainScene extends Phaser.Scene {
 
       const color = isCrit ? '#ffaa00' : '#ffffff';
       const killed = monster.takeDamage(roundedDmg);
+      if (killed) this.spawnFloatingText(monster.x, monster.y, 'KILL!', '#ff4444');
       
       if (!killed && monster.active && monster.body) monster.body.setVelocityY(800);
       
       this.spawnFloatingText(monster.x, monster.y - 20, `-${roundedDmg}${isCrit ? ' CRIT!' : ''}`, color);
       
-      let xpGained = 5;
-      if (player.hasXpFromDamage) xpGained += roundedDmg;
+      let xpGained = killed ? monster.killXP : 1;
+      if (player.hasXpFromDamage) xpGained += roundedDmg / 2;
 
       player.gainXp(xpGained);
       this.spawnFloatingText(player.x, player.y - 40, `+${xpGained} XP`, '#aaffaa');
