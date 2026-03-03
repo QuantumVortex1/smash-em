@@ -25,6 +25,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
   protected player: Player;
   private jumpCooldown: number = 0;
   protected textureKey: string;
+  private preferredOffset: number = 0;
 
   constructor(config: MonsterConfig) {
     super(config.scene, config.x, config.y, config.textureKey);
@@ -53,22 +54,46 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
     const distance = Phaser.Math.Distance.Between(this.x, this.y, this.player.x, this.player.y);
     
     this.anims.play(`${this.textureKey}-anim`, true);
+    if (!this.preferredOffset) this.preferredOffset = (80 + Math.random() * 100);
 
-    if (distanceX > 10) {
-      this.body.setVelocityX(this.speed);
-      this.setFlipX(false);
-    } else if (distanceX < -10) {
-      this.body.setVelocityX(-this.speed);
-      this.setFlipX(true);
+    let targetX = this.player.x;
+
+    if (this.player.y < this.y - 30) {
+      const side = (distanceX > 0) ? -1 : 1; 
+      targetX = this.player.x + ((this as any).preferredOffset * side);
     } else {
-      this.body.setVelocityX(0);
+      targetX = this.player.x;
+      if (Math.random() < 0.02) this.preferredOffset = (80 + Math.random() * 100);
+    }
+
+    const diffToTarget = targetX - this.x;
+    const isGrounded = this.body.touching.down || this.body.blocked.down;
+
+    if (isGrounded) {
+      if (diffToTarget > 15) {
+        this.body.setVelocityX(this.speed);
+        this.setFlipX(false);
+      } else if (diffToTarget < -15) {
+        this.body.setVelocityX(-this.speed);
+        this.setFlipX(true);
+      } else {
+        this.body.setVelocityX(0);
+        this.setFlipX(distanceX < 0);
+      }
     }
 
     this.jumpCooldown -= delta;
-    if (this.body.touching.down && this.jumpCooldown <= 0) {
-      if (distance < 250 && (distanceY < -50 || Math.random() < 0.1)) {
-        this.body.setVelocityY(this.jumpForce);
-        this.jumpCooldown = 1000 + Math.random() * 1500;
+    if (isGrounded && this.jumpCooldown <= 0) {
+      if (distance < 350) {
+        if (distanceY < -20 || (Math.abs(diffToTarget) <= 20 && Math.abs(distanceX) < 200)) {
+             const variedJumpForce = this.jumpForce * (0.8 + Math.random() * 0.4);
+             this.body.setVelocityY(variedJumpForce);
+             
+             const jumpSpeedX = (distanceX > 0 ? 1 : -1) * (this.speed * 1.05);
+             this.body.setVelocityX(jumpSpeedX);
+             
+             this.jumpCooldown = 600 + Math.random() * 800;
+        }
       }
     }
   }
