@@ -27,7 +27,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     public hasLongImmunity: boolean = false;
     public hasXpFromDamage: boolean = false;
     public hasGroundSlam: boolean = false;
-    public xpReqFactor: number = 1.0;
+    public xpReqFactor: number = 1;
     public hasSpeedDmgMult: boolean = false;
 
     private isInvulnerable: boolean = false;
@@ -137,7 +137,7 @@ export class Player extends Phaser.GameObjects.Sprite {
         while (this.totalXp >= this.currentLevelStartXp + (this.baseNextLevelXp * this.xpReqFactor)) {
             this.currentLevelStartXp += (this.baseNextLevelXp * this.xpReqFactor);
             this.level++;
-            this.baseNextLevelXp = Math.floor(this.baseNextLevelXp * 1.5);
+            this.baseNextLevelXp = Math.floor(this.baseNextLevelXp * 1.3);
 
             this.scene.cameras.main.flash(250, 255, 255, 255);
 
