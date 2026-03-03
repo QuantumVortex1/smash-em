@@ -250,8 +250,8 @@ export class MainScene extends Phaser.Scene {
     if (this.monsterSpawnTimer <= 0) {
       this.spawnMonster();
 
-      const minDelay = Math.max(400, 2000 - (this.gameTimeSeconds * 10));
-      this.monsterSpawnTimer = minDelay + Math.random() * (minDelay * 0.5);
+      const minDelay = Math.max(600, 2500 - (this.gameTimeSeconds * 6));
+      this.monsterSpawnTimer = minDelay + Math.random() * (minDelay * 0.4);
     }
   }
 
@@ -354,12 +354,12 @@ export class MainScene extends Phaser.Scene {
     let pool: number[] = [];
     const s = this.gameTimeSeconds;
 
-    if (s < 20) pool = [0, 0, 0, 0, 1];
-    else if (s < 45) pool = [0, 0, 1, 1, 2];
-    else if (s < 75) pool = [0, 1, 1, 2, 2, 3];
-    else if (s < 120) pool = [1, 2, 2, 3, 3, 4];
-    else if (s < 180) pool = [2, 3, 3, 4, 4, 5];
-    else pool = [3, 4, 4, 5, 5, 5];
+    if (s < 45) pool = [0, 0, 0, 0, 1];
+    else if (s < 90) pool = [0, 0, 1, 1, 2];
+    else if (s < 150) pool = [0, 1, 1, 2, 2, 3];
+    else if (s < 240) pool = [1, 1, 2, 2, 3, 4];
+    else if (s < 360) pool = [1, 2, 3, 3, 4, 5];
+    else pool = [2, 3, 4, 5, 5, 5];
 
     const chosenIndex = pool[Math.floor(Math.random() * pool.length)];
     const MonsterClass = MonsterTypes[chosenIndex];
