@@ -117,36 +117,36 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
 
 export class BloodshotEye extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'bloodshot-eye', speed: 100, jumpForce: -400, hp: 1, damage: 1, killXP: 2, player });
+    super({ scene, x, y, textureKey: 'bloodshot-eye', speed: 100, jumpForce: -400, hp: 1, damage: 1, killXP: 3, player });
   }
 }
 
 export class OcularWatcher extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'ocular-watcher', speed: 120, jumpForce: -450, hp: 3, damage: 2, killXP: 3, player });
+    super({ scene, x, y, textureKey: 'ocular-watcher', speed: 120, jumpForce: -450, hp: 3, damage: 2, killXP: 5, player });
   }
 }
 
 export class OchreJelly extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'ochre-jelly', speed: 150, jumpForce: -550, hp: 6, damage: 3, killXP: 5, player });
+    super({ scene, x, y, textureKey: 'ochre-jelly', speed: 150, jumpForce: -550, hp: 6, damage: 3, killXP: 8, player });
   }
 }
 
 export class DeathSlime extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'death-slime', speed: 180, jumpForce: -650, hp: 10, damage: 5, killXP: 7, player });
+    super({ scene, x, y, textureKey: 'death-slime', speed: 180, jumpForce: -650, hp: 10, damage: 5, killXP: 12, player });
   }
 }
 
 export class MurkySlaad extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'murky-slaad', speed: 220, jumpForce: -720, hp: 17, damage: 7, killXP: 10, player });
+    super({ scene, x, y, textureKey: 'murky-slaad', speed: 220, jumpForce: -720, hp: 17, damage: 7, killXP: 20, player });
   }
 }
 
 export class CrimsonSlaad extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'crimson-slaad', speed: 250, jumpForce: -850, hp: 25, damage: 10, killXP: 15, player });
+    super({ scene, x, y, textureKey: 'crimson-slaad', speed: 250, jumpForce: -850, hp: 25, damage: 10, killXP: 30, player });
   }
 }
