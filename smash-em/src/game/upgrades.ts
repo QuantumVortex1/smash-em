@@ -75,6 +75,7 @@ export const allUpgrades: Upgrade[] = [
         name: 'Sprungfeder',
         description: 'Setzt bei Sprüngen auf Gegnern deine Sprünge zurück',
         rarity: 'onetime',
+        canApply: (p) => !p.hasResetBounces,
         apply: (p) => p.hasResetBounces = true,
     },
     {
