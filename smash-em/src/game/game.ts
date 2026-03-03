@@ -8,6 +8,7 @@ export class MainScene extends Phaser.Scene {
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
   private monsters!: Phaser.Physics.Arcade.Group;
   private monsterSpawnTimer: number = 0;
+  private gameTimeSeconds: number = 0;
   private lastBounceTime: number = 0;
 
   private hpBarBg!: Phaser.GameObjects.Rectangle;
@@ -130,6 +131,8 @@ export class MainScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (this.physics.world.isPaused) return;
 
+    this.gameTimeSeconds += delta / 1000;
+
     if (this.player.body.blocked.down || (this.player.body.touching.down && this.player.body.velocity.y === 0)) {
       this.consecutiveBounces = 0;
     }
@@ -146,7 +149,9 @@ export class MainScene extends Phaser.Scene {
     this.monsterSpawnTimer -= delta;
     if (this.monsterSpawnTimer <= 0) {
       this.spawnMonster();
-      this.monsterSpawnTimer = 2500 + Math.random() * 1000;
+      
+      const minDelay = Math.max(400, 2000 - (this.gameTimeSeconds * 10));
+      this.monsterSpawnTimer = minDelay + Math.random() * (minDelay * 0.5);
     }
   }
 
@@ -205,12 +210,21 @@ export class MainScene extends Phaser.Scene {
       CrimsonSlaad
     ];
 
-    const MonsterClass = MonsterTypes[this.monsterSpawnIndex];
+    let pool: number[] = [];
+    const s = this.gameTimeSeconds;
+    
+    if (s < 20) pool = [0, 0, 0, 0, 1];
+    else if (s < 45) pool = [0, 0, 1, 1, 2];
+    else if (s < 75) pool = [0, 1, 1, 2, 2, 3];
+    else if (s < 120) pool = [1, 2, 2, 3, 3, 4];
+    else if (s < 180) pool = [2, 3, 3, 4, 4, 5];
+    else pool = [3, 4, 4, 5, 5, 5];
+
+    const chosenIndex = pool[Math.floor(Math.random() * pool.length)];
+    const MonsterClass = MonsterTypes[chosenIndex];
 
     const monster = new MonsterClass(this, spawnX, spawnY, this.player);
     this.monsters.add(monster);
-
-    this.monsterSpawnIndex = (this.monsterSpawnIndex + 1) % MonsterTypes.length;
   }
 
   private awardXP(baseXp: number, isKill: boolean, textX: number, textY: number) {
