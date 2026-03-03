@@ -368,6 +368,28 @@ export class MainScene extends Phaser.Scene {
     overlayGroup.add(overlay);
     overlayGroup.add(title);
 
+    const selectUpgrade = (index: number) => {
+      if (!upgrades[index]) return;
+      upgrades[index].apply(this.player);
+
+      this.input.keyboard?.removeKey('ONE');
+      this.input.keyboard?.removeKey('TWO');
+      this.input.keyboard?.removeKey('THREE');
+      this.input.keyboard?.removeKey('NUMPAD_ONE');
+      this.input.keyboard?.removeKey('NUMPAD_TWO');
+      this.input.keyboard?.removeKey('NUMPAD_THREE');
+
+      overlayGroup.clear(true, true);
+      this.physics.resume();
+    };
+
+    this.input.keyboard?.once('keydown-ONE', () => selectUpgrade(0));
+    this.input.keyboard?.once('keydown-TWO', () => selectUpgrade(1));
+    this.input.keyboard?.once('keydown-THREE', () => selectUpgrade(2));
+    this.input.keyboard?.once('keydown-NUMPAD_ONE', () => selectUpgrade(0));
+    this.input.keyboard?.once('keydown-NUMPAD_TWO', () => selectUpgrade(1));
+    this.input.keyboard?.once('keydown-NUMPAD_THREE', () => selectUpgrade(2));
+
     upgrades.forEach((upgrade, index) => {
       const x = 200 + (index * 200);
       const y = 350;
@@ -401,18 +423,20 @@ export class MainScene extends Phaser.Scene {
         wordWrap: { width: 160 }
       }).setOrigin(0.5);
 
-      cardContainer.add([cardBg, rarityText, nameText, descText]);
+      const hintText = this.add.text(0, 100, `Taste [ ${index + 1} ]`, {
+        fontSize: '14px',
+        color: '#888888',
+        fontFamily: 'Arial',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+
+      cardContainer.add([cardBg, rarityText, nameText, descText, hintText]);
       overlayGroup.add(cardContainer);
 
       cardBg.on('pointerover', () => cardBg.setFillStyle(0x444444));
       cardBg.on('pointerout', () => cardBg.setFillStyle(0x222222));
 
-      cardBg.on('pointerdown', () => {
-        upgrade.apply(this.player);
-
-        overlayGroup.clear(true, true);
-        this.physics.resume();
-      });
+      cardBg.on('pointerdown', () => selectUpgrade(index));
     });
   }
 }

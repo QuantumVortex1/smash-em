@@ -104,7 +104,11 @@ export class MenuScene extends Phaser.Scene {
       });
     });
 
-    playBtnBg.on('pointerdown', () => {
+    const startGame = () => {
+      this.input.keyboard?.off('keydown-SPACE', startGame);
+      this.input.keyboard?.off('keydown-ENTER', startGame);
+      playBtnBg.disableInteractive();
+
       playBtnBg.setFillStyle(0x008800);
       this.tweens.add({
         targets: btnContainer,
@@ -116,6 +120,10 @@ export class MenuScene extends Phaser.Scene {
           this.scene.start('MainScene');
         }
       });
-    });
+    };
+
+    playBtnBg.on('pointerdown', startGame);
+    this.input.keyboard?.once('keydown-SPACE', startGame);
+    this.input.keyboard?.once('keydown-ENTER', startGame);
   }
 }
