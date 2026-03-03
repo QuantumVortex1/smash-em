@@ -232,15 +232,31 @@ export class MainScene extends Phaser.Scene {
       player.gainXp(xpGained);
       this.spawnFloatingText(player.x, player.y - 40, `+${xpGained} XP`, '#aaffaa');
 
+      const cachedFallSpeed = Math.abs(player.body.velocity.y);
+
       if (player.hasBloodthirst && killed) {
         player.heal(1);
         this.spawnFloatingText(player.x, player.y - 60, '+1 HP', '#00ff00');
       }
 
       if (player.hasGroundSlam) {
+        const aoeRadius = 30 + (cachedFallSpeed * 0.11); 
+        
+        const shockwave = this.add.ellipse(player.x, player.y + 15, aoeRadius * 2, aoeRadius * 0.3, 0xffaa00, 0.6);
+        shockwave.setScale(0.01);
+        this.tweens.add({
+          targets: shockwave,
+          scaleX: 1,
+          scaleY: 1,
+          alpha: 0,
+          duration: 400,
+          ease: 'Cubic.easeOut',
+          onComplete: () => shockwave.destroy()
+        });
+
         this.monsters.getChildren().forEach((c: any) => {
           const m = c as BaseMonster;
-          if (m !== monster && Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y) < 100) {
+          if (m !== monster && Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y) <= aoeRadius) {
             m.takeDamage(1);
             this.spawnFloatingText(m.x, m.y - 20, '-1 AOE', '#ff8800');
           }
