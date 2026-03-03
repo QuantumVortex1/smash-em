@@ -33,7 +33,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
     
-    this.setScale(2.5);
+    this.setScale(3);
     this.body.setCollideWorldBounds(true);
     this.body.setBounceY(0.3); 
     
