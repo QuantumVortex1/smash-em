@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 
-export class Player extends Phaser.GameObjects.Rectangle {
+export class Player extends Phaser.GameObjects.Sprite {
     declare body: Phaser.Physics.Arcade.Body;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private wasd: any;
@@ -29,12 +29,15 @@ export class Player extends Phaser.GameObjects.Rectangle {
     public xpReqFactor: number = 1.0;
 
     private isInvulnerable: boolean = false;
-    public onLevelUp?: () => void;
+    public pendingLevelUps: number = 0;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
-        super(scene, x, y, 40, 40, 0xff4444);
+        super(scene, x, y, 'player-idle');
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        
+        this.setScale(2.5);
+        
         this.body.setCollideWorldBounds(true);
 
         this.body.setDragX(1500);
@@ -55,13 +58,24 @@ export class Player extends Phaser.GameObjects.Rectangle {
 
         if (this.cursors.left.isDown || this.wasd.A.isDown) {
             this.body.setAccelerationX(-this.acceleration);
+            this.setFlipX(true);
+            if (this.body.blocked.down || this.body.touching.down) {
+                this.anims.play('player-walk', true);
+            }
         } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
             this.body.setAccelerationX(this.acceleration);
+            this.setFlipX(false);
+            if (this.body.blocked.down || this.body.touching.down) {
+                this.anims.play('player-walk', true);
+            }
         } else {
             if (this.body.acceleration.x > 0) {
                 this.body.setAccelerationX(Math.max(this.body.acceleration.x - deacceleration, 0));
             } else if (this.body.acceleration.x < 0) {
                 this.body.setAccelerationX(Math.min(this.body.acceleration.x + deacceleration, 0));
+            }
+            if (this.body.blocked.down || this.body.touching.down) {
+                this.anims.play('player-idle', true);
             }
         }
 
@@ -69,7 +83,11 @@ export class Player extends Phaser.GameObjects.Rectangle {
             Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
             Phaser.Input.Keyboard.JustDown(this.wasd.W);
 
-        if (this.body.blocked.down || (this.body.touching.down && this.body.velocity.y === 0)) this.jumpsLeft = this.maxJumps;
+        if (this.body.blocked.down || (this.body.touching.down && this.body.velocity.y === 0)) {
+            this.jumpsLeft = this.maxJumps;
+        } else {
+            this.anims.play('player-idle', true);
+        }
 
         if (isJumpJustDown && this.jumpsLeft > 0) {
             this.body.setVelocityY(this.jumpForce);
@@ -121,7 +139,7 @@ export class Player extends Phaser.GameObjects.Rectangle {
 
             this.scene.cameras.main.flash(250, 255, 255, 255);
 
-            if (this.onLevelUp) this.onLevelUp();
+            this.pendingLevelUps++;
         }
     }
 }

@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { Player } from '../entities/player';
-import { BaseMonster, BasicSlime } from '../entities/monster';
+import { BaseMonster, BloodshotEye, OcularWatcher, OchreJelly, DeathSlime, MurkySlaad, CrimsonSlaad } from '../entities/monster';
 import { getRandomUpgrades } from './upgrades';
 
 export class MainScene extends Phaser.Scene {
@@ -17,12 +17,53 @@ export class MainScene extends Phaser.Scene {
   private hpText!: Phaser.GameObjects.Text;
   private xpText!: Phaser.GameObjects.Text;
   private levelText!: Phaser.GameObjects.Text;
+  private monsterSpawnIndex: number = 0;
 
   constructor() {
     super({ key: 'MainScene' });
   }
 
+  preload() {
+    this.load.spritesheet('player-idle', '/assets/player/16x16%20Idle-Sheet.png', { frameWidth: 20, frameHeight: 20 });
+    this.load.spritesheet('player-walk', '/assets/player/16x16%20Walk-Sheet.png', { frameWidth: 20, frameHeight: 20 });
+
+    this.load.spritesheet('bloodshot-eye', '/assets/monsters/BloodshotEye.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('ocular-watcher', '/assets/monsters/OcularWatcher.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('ochre-jelly', '/assets/monsters/OchreJelly.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('death-slime', '/assets/monsters/DeathSlime.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('murky-slaad', '/assets/monsters/MurkySlaad.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('crimson-slaad', '/assets/monsters/CrimsonSlaad.png', { frameWidth: 16, frameHeight: 16 });
+  }
+
   create() {
+    this.anims.create({
+      key: 'player-idle',
+      frames: this.anims.generateFrameNumbers('player-idle', { start: 8, end: 11 }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'player-walk',
+      frames: this.anims.generateFrameNumbers('player-walk', { start: 8, end: 11 }),
+      frameRate: 10,
+      repeat: -1
+    });
+
+    const monsterKeys = [
+      'bloodshot-eye', 'ocular-watcher', 'ochre-jelly', 
+      'death-slime', 'murky-slaad', 'crimson-slaad'
+    ];
+
+    monsterKeys.forEach(key => {
+      this.anims.create({
+        key: `${key}-anim`,
+        frames: this.anims.generateFrameNumbers(key, { start: 0, end: 3 }),
+        frameRate: 8,
+        repeat: -1
+      });
+    });
+
     this.platforms = this.physics.add.staticGroup();
 
     const ground = this.add.rectangle(400, 550, 800, 100, 0x654321);
@@ -32,7 +73,6 @@ export class MainScene extends Phaser.Scene {
     this.platforms.add(grass);
 
     this.player = new Player(this, 380, 200);
-    this.player.onLevelUp = () => this.showUpgradeScreen();
 
     this.monsters = this.physics.add.group({
       runChildUpdate: true
@@ -84,13 +124,21 @@ export class MainScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    if (this.physics.world.isPaused) return;
+
+    if (this.player.pendingLevelUps > 0) {
+      this.player.pendingLevelUps--;
+      this.showUpgradeScreen();
+      return;
+    }
+
     this.player.update();
     this.updateUI();
 
     this.monsterSpawnTimer -= delta;
     if (this.monsterSpawnTimer <= 0) {
       this.spawnMonster();
-      this.monsterSpawnTimer = 500 + Math.random() * 1000;
+      this.monsterSpawnTimer = 2500 + Math.random() * 1000;
     }
   }
 
@@ -140,16 +188,32 @@ export class MainScene extends Phaser.Scene {
     const spawnX = Math.random() > 0.5 ? 50 : 750;
     const spawnY = 100;
 
-    const monster = new BasicSlime(this, spawnX, spawnY, this.player);
+    const MonsterTypes = [
+      BloodshotEye, 
+      OcularWatcher, 
+      OchreJelly, 
+      DeathSlime, 
+      MurkySlaad, 
+      CrimsonSlaad
+    ];
+
+    const MonsterClass = MonsterTypes[this.monsterSpawnIndex];
+
+    const monster = new MonsterClass(this, spawnX, spawnY, this.player);
     this.monsters.add(monster);
+
+    this.monsterSpawnIndex = (this.monsterSpawnIndex + 1) % MonsterTypes.length;
   }
 
     private handlePlayerMonsterCollision(player: Player, monster: BaseMonster) {
-    const isFalling = player.body.velocity.y > 0;
-    const isJustBounced = this.time.now - this.lastBounceTime < 50;
-    const isAboveMonster = player.body.bottom <= monster.body.top + 20;
+    if (!monster.active || !player.active) return;
 
-    if ((isFalling || isJustBounced) && isAboveMonster) {
+    const isFallingOrMonsterJumping = (player.body.velocity.y - monster.body.velocity.y) > 0;
+    const isJustBounced = this.time.now - this.lastBounceTime < 50;
+    
+    const isAboveMonster = player.body.bottom < (monster.y + 10);
+
+    if ((isFallingOrMonsterJumping || isJustBounced) && isAboveMonster) {
       this.lastBounceTime = this.time.now;
       const isCrit = Math.random() < player.critChance;
       const damageDealt = isCrit ? player.damage * player.critMultiplier : player.damage;
@@ -157,6 +221,8 @@ export class MainScene extends Phaser.Scene {
 
       const color = isCrit ? '#ffaa00' : '#ffffff';
       const killed = monster.takeDamage(roundedDmg);
+      
+      if (!killed && monster.active && monster.body) monster.body.setVelocityY(800);
       
       this.spawnFloatingText(monster.x, monster.y - 20, `-${roundedDmg}${isCrit ? ' CRIT!' : ''}`, color);
       
@@ -183,8 +249,10 @@ export class MainScene extends Phaser.Scene {
 
       player.jumpsLeft = Math.min(player.maxJumps, player.jumpsLeft + player.jumpsRestoredOnBounce);
       
-      player.body.setVelocityY(-400);
+      player.body.setVelocityY(-650);
 
+    } else if (player.body.velocity.y <= 0 && isAboveMonster) {
+      return;
     } else {
       const damage = monster.damage || 1;
       if (player.takeDamage(damage)) {
