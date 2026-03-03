@@ -69,12 +69,16 @@ export class MainScene extends Phaser.Scene {
       });
     });
 
+    this.createBackground();
+
     this.platforms = this.physics.add.staticGroup();
 
-    const ground = this.add.rectangle(400, 550, 800, 100, 0x654321);
+    const ground = this.add.rectangle(400, 550, 800, 100, 0x1f1424);
+    ground.setStrokeStyle(4, 0x000000);
     this.platforms.add(ground);
 
-    const grass = this.add.rectangle(400, 500, 800, 20, 0x3CB371);
+    const grass = this.add.rectangle(400, 500, 800, 20, 0x224a2e);
+    grass.setStrokeStyle(2, 0x000000);
     this.platforms.add(grass);
 
     this.player = new Player(this, 380, 200);
@@ -91,6 +95,89 @@ export class MainScene extends Phaser.Scene {
     this.createUI();
 
     this.gameTimeSeconds = 0;
+  }
+
+  private createBackground() {
+    const w = this.cameras.main.width;
+    const h = this.cameras.main.height;
+
+    const sky = this.add.graphics();
+    sky.fillGradientStyle(0x1a0f2e, 0x1a0f2e, 0x0a1024, 0x0a1024, 1, 1, 1, 1);
+    sky.fillRect(0, 0, w, h);
+
+    const moon = this.add.circle(650, 150, 80, 0xd03e3e, 0.9);
+    const moonGlow = this.add.circle(650, 150, 100, 0xd03e3e, 0.4);
+    
+    this.tweens.add({
+      targets: moonGlow,
+      scaleX: 1.1,
+      scaleY: 1.1,
+      alpha: 0.2,
+      duration: 3000,
+      yoyo: true,
+      repeat: -1
+    });
+
+    const mountains = this.add.graphics();
+    mountains.fillStyle(0x120c1d, 1);
+    mountains.beginPath();
+    mountains.moveTo(0, h);
+    mountains.lineTo(0, 300);
+    mountains.lineTo(150, 180);
+    mountains.lineTo(300, 320);
+    mountains.lineTo(450, 190);
+    mountains.lineTo(600, 270);
+    mountains.lineTo(800, 200);
+    mountains.lineTo(800, h);
+    mountains.closePath();
+    mountains.fillPath();
+
+    const spawnCloud = (startX: number) => {
+        const cloudW = Phaser.Math.Between(300, 600);
+        const cloudH = Phaser.Math.Between(40, 100);
+        const cloudy = Phaser.Math.Between(80, 400); 
+
+        const cloud = this.add.ellipse(
+            startX, 
+            cloudy, 
+            cloudW, 
+            cloudH, 
+            0x2c2640, 
+            0.3
+        );
+        
+        const speed = Phaser.Math.FloatBetween(10, 25);
+        const distance = startX + cloudW;
+        const duration = (distance / speed) * 1000;
+
+        this.tweens.add({
+            targets: cloud,
+            x: -cloudW,
+            duration: duration,
+            onComplete: () => {
+                cloud.destroy();
+                spawnCloud(w + (cloudW / 2));
+            }
+        });
+    };
+
+    for (let i = 0; i < 6; i++) {
+        spawnCloud(Phaser.Math.Between(0, w));
+    }
+
+    const trees = this.add.graphics();
+    trees.fillStyle(0x0a0510, 1);
+    for (let x = -20; x < w + 50; x += Phaser.Math.Between(20, 50)) {
+        const y = 500;
+        const treeW = Phaser.Math.Between(15, 35);
+        const treeH = Phaser.Math.Between(60, 180);
+        
+        trees.fillTriangle(
+            x, y, 
+            x + treeW / 2, y - treeH, 
+            x + treeW, y
+        );
+    }
   }
 
   private uiContainer!: Phaser.GameObjects.Container;
