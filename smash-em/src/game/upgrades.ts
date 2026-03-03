@@ -138,7 +138,7 @@ export const allUpgrades: Upgrade[] = [
         name: 'Doppelsprung',
         description: 'Mehrfachsprung +1',
         rarity: 'rare',
-        apply: (p) => p.maxJumps += 1,
+        apply: (p) => { p.maxJumps += 1; p.jumpsLeft += 1; },
     }
 ];
 
