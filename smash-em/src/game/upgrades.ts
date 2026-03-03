@@ -101,6 +101,14 @@ export const allUpgrades: Upgrade[] = [
         canApply: (p) => !p.hasGroundSlam,
         apply: (p) => p.hasGroundSlam = true,
     },
+    {
+        id: 'speed-dmg-mult',
+        name: 'Adrenalin',
+        description: 'Erhöhter Schaden bei erhöhter Fallgeschwindigkeit',
+        rarity: 'onetime',
+        canApply: (p) => !p.hasSpeedDmgMult,
+        apply: (p) => p.hasSpeedDmgMult = true,
+    },
 
     // rare
     {

@@ -27,6 +27,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     public hasXpFromDamage: boolean = false;
     public hasGroundSlam: boolean = false;
     public xpReqFactor: number = 1.0;
+    public hasSpeedDmgMult: boolean = false;
 
     private isInvulnerable: boolean = false;
     public pendingLevelUps: number = 0;
@@ -141,6 +142,11 @@ export class Player extends Phaser.GameObjects.Sprite {
 
             this.pendingLevelUps++;
         }
+    }
+
+    getSpeedDamageMultiplier(fallSpeed: number): number {
+        if (!this.hasSpeedDmgMult) return 1;
+        return 1 + (fallSpeed / 1500);
     }
 }
 

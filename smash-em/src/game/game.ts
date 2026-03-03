@@ -216,8 +216,9 @@ export class MainScene extends Phaser.Scene {
     if ((isFallingOrMonsterJumping || isJustBounced) && isAboveMonster) {
       this.lastBounceTime = this.time.now;
       const isCrit = Math.random() < player.critChance;
-      const damageDealt = isCrit ? player.damage * player.critMultiplier : player.damage;
-      const roundedDmg = Math.max(1, Math.round(damageDealt));
+      const cachedFallSpeed = Math.abs(player.body.velocity.y);
+      const damageDealt = (isCrit ? player.damage * player.critMultiplier : player.damage) * player.getSpeedDamageMultiplier(cachedFallSpeed);
+      const roundedDmg = Math.max(1, Math.round(damageDealt*10)/10);
 
       const color = isCrit ? '#ffaa00' : '#ffffff';
       const killed = monster.takeDamage(roundedDmg);
@@ -232,7 +233,6 @@ export class MainScene extends Phaser.Scene {
       player.gainXp(xpGained);
       this.spawnFloatingText(player.x, player.y - 40, `+${xpGained} XP`, '#aaffaa');
 
-      const cachedFallSpeed = Math.abs(player.body.velocity.y);
 
       if (player.hasBloodthirst && killed) {
         player.heal(1);
@@ -257,8 +257,9 @@ export class MainScene extends Phaser.Scene {
         this.monsters.getChildren().forEach((c: any) => {
           const m = c as BaseMonster;
           if (m !== monster && Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y) <= aoeRadius) {
-            m.takeDamage(1);
-            this.spawnFloatingText(m.x, m.y - 20, '-1 AOE', '#ff8800');
+            const aoeDmg = Math.round(player.getSpeedDamageMultiplier(cachedFallSpeed) * 10) / 10;
+            m.takeDamage(aoeDmg);
+            this.spawnFloatingText(m.x, m.y - 20, `-${aoeDmg} AOE`, '#ff8800');
           }
         });
       }
