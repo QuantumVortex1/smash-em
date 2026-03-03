@@ -89,6 +89,8 @@ export class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.monsters, this.handlePlayerMonsterCollision as any, undefined, this);
 
     this.createUI();
+
+    this.gameTimeSeconds = 0;
   }
 
   private createUI() {
@@ -149,7 +151,7 @@ export class MainScene extends Phaser.Scene {
     this.monsterSpawnTimer -= delta;
     if (this.monsterSpawnTimer <= 0) {
       this.spawnMonster();
-      
+
       const minDelay = Math.max(400, 2000 - (this.gameTimeSeconds * 10));
       this.monsterSpawnTimer = minDelay + Math.random() * (minDelay * 0.5);
     }
@@ -165,7 +167,7 @@ export class MainScene extends Phaser.Scene {
     const nextLevelReq = this.player.currentLevelStartXp + (this.player.baseNextLevelXp * this.player.xpReqFactor);
     const currentProgress = this.player.totalXp - this.player.currentLevelStartXp;
     const requiredForCurrentLevel = nextLevelReq - this.player.currentLevelStartXp;
-  
+
     const xpPercent = Math.max(0, Math.min(1, currentProgress / requiredForCurrentLevel));
     this.xpBarFill.width = 200 * xpPercent;
     this.xpText.setText(`${Math.floor(this.player.totalXp)} / ${Math.floor(nextLevelReq)} XP`);
@@ -212,7 +214,7 @@ export class MainScene extends Phaser.Scene {
 
     let pool: number[] = [];
     const s = this.gameTimeSeconds;
-    
+
     if (s < 20) pool = [0, 0, 0, 0, 1];
     else if (s < 45) pool = [0, 0, 1, 1, 2];
     else if (s < 75) pool = [0, 1, 1, 2, 2, 3];

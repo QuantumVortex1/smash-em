@@ -56,7 +56,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     update() {
         this.body.setMaxVelocity(this.speedLimit, 1500);
 
-        const deacceleration = 300;
+        const deacceleration = 3000;
 
         if (this.cursors.left.isDown || this.wasd.A.isDown) {
             this.body.setAccelerationX(-this.acceleration);
