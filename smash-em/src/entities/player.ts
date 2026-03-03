@@ -20,7 +20,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     public jumpsLeft: number = 1;
 
     public hasBloodthirst: boolean = false;
-    public jumpsRestoredOnBounce: number = 1;
+    public hasResetBounces: boolean = false;
     public critChance: number = 0;
     public critMultiplier: number = 2;
     public hasLongImmunity: boolean = false;

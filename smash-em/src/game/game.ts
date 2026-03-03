@@ -247,7 +247,7 @@ export class MainScene extends Phaser.Scene {
         });
       }
 
-      player.jumpsLeft = Math.min(player.maxJumps, player.jumpsLeft + player.jumpsRestoredOnBounce);
+      if (player.hasResetBounces) player.jumpsLeft = player.maxJumps;
       
       player.body.setVelocityY(-650);
 
