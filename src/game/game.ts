@@ -34,15 +34,15 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet('player-idle', '/assets/player/16x16%20Idle-Sheet.png', { frameWidth: 20, frameHeight: 20 });
-    this.load.spritesheet('player-walk', '/assets/player/16x16%20Walk-Sheet.png', { frameWidth: 20, frameHeight: 20 });
+    this.load.spritesheet('player-idle', './assets/player/16x16%20Idle-Sheet.png', { frameWidth: 20, frameHeight: 20 });
+    this.load.spritesheet('player-walk', './assets/player/16x16%20Walk-Sheet.png', { frameWidth: 20, frameHeight: 20 });
 
-    this.load.spritesheet('bloodshot-eye', '/assets/monsters/BloodshotEye.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.spritesheet('ocular-watcher', '/assets/monsters/OcularWatcher.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.spritesheet('ochre-jelly', '/assets/monsters/OchreJelly.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.spritesheet('death-slime', '/assets/monsters/DeathSlime.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.spritesheet('murky-slaad', '/assets/monsters/MurkySlaad.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.spritesheet('crimson-slaad', '/assets/monsters/CrimsonSlaad.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('bloodshot-eye', './assets/monsters/BloodshotEye.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('ocular-watcher', './assets/monsters/OcularWatcher.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('ochre-jelly', './assets/monsters/OchreJelly.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('death-slime', './assets/monsters/DeathSlime.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('murky-slaad', './assets/monsters/MurkySlaad.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('crimson-slaad', './assets/monsters/CrimsonSlaad.png', { frameWidth: 16, frameHeight: 16 });
   }
 
   create() {
