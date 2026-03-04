@@ -501,7 +501,7 @@ export class MainScene extends Phaser.Scene {
         this.monsters.getChildren().forEach((c: any) => {
           const m = c as BaseMonster;
           if (m !== monster && Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y) <= aoeRadius) {
-            const aoeDmg = Math.round(player.damage * player.getSpeedDamageMultiplier(cachedFallSpeed) * 10) / 10;
+            const aoeDmg = Math.round(player.damage * player.getSpeedDamageMultiplier(cachedFallSpeed) * 5) / 10;
             const aoeKilled = m.takeDamage(aoeDmg);
             this.spawnFloatingText(m.x, m.y - 20, `-${aoeDmg} AOE`, '#ff8800');
 
