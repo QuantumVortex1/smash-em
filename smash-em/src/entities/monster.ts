@@ -62,7 +62,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
         this.isFrozen = false;
         this.clearTint();
       } else {
-        this.body.setVelocity(0, 0);
+        this.body.setVelocityX(0);
         return;
       }
     }
@@ -121,7 +121,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
       this.isFrozen = true;
       this.frozenTime = this.scene.time.now + 2000;
       this.setTint(0x99d9ea);
-      this.body.setVelocity(0, 0);
+      this.body.setVelocityX(0);
     }
     return false;
   }
