@@ -415,7 +415,8 @@ export class MainScene extends Phaser.Scene {
 
     let airMult = 1.0;
     if (this.consecutiveBounces >= 3) {
-      airMult = 1.0 + (this.consecutiveBounces - 2) * 0.1;
+      if (this.consecutiveBounces <= 7) airMult = 1.0 + (this.consecutiveBounces - 2) * 0.2;
+      else airMult = 2.0 + ((this.consecutiveBounces - 7) * 0.1);
       finalXp *= airMult;
     }
 
