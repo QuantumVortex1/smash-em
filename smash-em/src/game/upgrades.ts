@@ -15,9 +15,9 @@ export const allUpgrades: Upgrade[] = [
     {
         id: 'jump-boost',
         name: 'Jump-Boost',
-        description: 'Sprungkraft +40',
+        description: 'Sprungkraft +60',
         rarity: 'common',
-        apply: (p) => p.jumpForce -= 40,
+        apply: (p) => p.jumpForce -= 60,
     },
     {
         id: 'speed-boost',
@@ -36,20 +36,20 @@ export const allUpgrades: Upgrade[] = [
     {
         id: 'hp-boost',
         name: 'HP-Boost',
-        description: 'Max HP +2, heilt dich um 2',
+        description: 'Max HP +4, heilt dich um 4',
         rarity: 'common',
         apply: (p) => {
-            p.maxHp += 2;
-            p.hp += 2;
+            p.maxHp += 4;
+            p.hp += 4;
         }
     },
     {
         id: 'heal',
         name: 'Heal',
-        description: 'Heile +6 HP',
+        description: 'Heile +10 HP',
         rarity: 'common',
         apply: (p) => {
-            p.hp = Math.min(p.maxHp, p.hp + 6);
+            p.hp = Math.min(p.maxHp, p.hp + 10);
         }
     },
     {
@@ -57,10 +57,17 @@ export const allUpgrades: Upgrade[] = [
         name: 'Bounce Boost',
         description: 'Pralle höher ab, wenn du auf Gegner springst',
         rarity: 'common',
-        apply: (p) => { p.bounceBoost -= 30; },
+        apply: (p) => { p.bounceBoost -= 40; },
+    },
+    {
+        id: 'shield',
+        name: 'Schild',
+        description: 'Reduziert erlittenen Schaden um 15%',
+        rarity: 'common',
+        apply: (p) => p.defensiveDmgMult *= 0.85,
     },
 
-    // One Time
+    // onetime
     {
         id: 'bloodthirst',
         name: 'Blutdurst',
@@ -68,14 +75,6 @@ export const allUpgrades: Upgrade[] = [
         rarity: 'onetime',
         canApply: (p) => !p.hasBloodthirst,
         apply: (p) => p.hasBloodthirst = true,
-    },
-    {
-        id: 'crit-chance',
-        name: 'Krit-Auge',
-        description: 'Krit-Chance stark erhöht (+20%)',
-        rarity: 'onetime',
-        canApply: (p) => p.critChance < 0.2,
-        apply: (p) => p.critChance += 0.2,
     },
     {
         id: 'springboard',
@@ -88,7 +87,7 @@ export const allUpgrades: Upgrade[] = [
     {
         id: 'immunity-boost',
         name: 'Schildkröte',
-        description: 'Chance, nach Schaden kurzzeitig unverwundbar zu sein',
+        description: 'Du wirst nach Schaden kurzzeitig unverwundbar',
         rarity: 'onetime',
         canApply: (p) => !p.hasLongImmunity,
         apply: (p) => p.hasLongImmunity = true,
@@ -117,21 +116,45 @@ export const allUpgrades: Upgrade[] = [
         canApply: (p) => !p.hasSpeedDmgMult,
         apply: (p) => p.hasSpeedDmgMult = true,
     },
+    {
+        id: 'frost-bite',
+        name: 'Frostbiss',
+        description: 'Chance von 30%, Gegner bei einem Treffer kurzzeitug einzufrieren',
+        rarity: 'onetime',
+        canApply: (p) => !p.hasFrostBite,
+        apply: (p) => p.hasFrostBite = true,
+    },
+    {
+        id: 'lucky-shot',
+        name: 'Glücksgriff',
+        description: 'Chance von 25%, zwei Upgrades auf einmal zu bekommen',
+        rarity: 'onetime',
+        canApply: (p) => !p.hasLuckyShot,
+        apply: (p) => p.hasLuckyShot = true,
+    },
 
     // rare
     {
+        id: 'crit-chance',
+        name: 'Krit-Auge',
+        description: 'Krit-Chance stark erhöht (+25%)',
+        rarity: 'rare',
+        canApply: (p) => p.critChance < 0.8,
+        apply: (p) => p.critChance += 0.25,
+    },
+    {
         id: 'fast-learner',
         name: 'Superhirn',
-        description: 'Schnellere Level-Ups (-20% XP req)',
+        description: 'Sammle 40% mehr XP',
         rarity: 'rare',
-        apply: (p) => p.xpReqFactor *= 0.8,
+        apply: (p) => p.xpMult *= 1.4,
     },
     {
         id: 'crit-dmg',
         name: 'Brutalität',
-        description: 'Krit-DMG Faktor +0.2',
+        description: 'Krit-DMG Faktor +0.4',
         rarity: 'rare',
-        apply: (p) => p.critMultiplier += 0.2,
+        apply: (p) => p.critMultiplier += 0.4,
     },
     {
         id: 'multi-jump',
@@ -149,7 +172,7 @@ export function getRandomUpgrades(player: Player, count: number = 3): Upgrade[] 
         const roll = Math.random();
         let targetRarity: UpgradeRarity = 'common';
         if (roll < 0.05) targetRarity = 'rare';
-        else if (roll < 0.2) targetRarity = 'onetime';
+        else if (roll < 0.25) targetRarity = 'onetime';
         else targetRarity = 'common';
 
         let candidates = available.filter(u => u.rarity === targetRarity);

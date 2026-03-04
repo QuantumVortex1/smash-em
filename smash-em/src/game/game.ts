@@ -18,7 +18,6 @@ export class MainScene extends Phaser.Scene {
   private hpText!: Phaser.GameObjects.Text;
   private xpText!: Phaser.GameObjects.Text;
   private levelText!: Phaser.GameObjects.Text;
-  private monsterSpawnIndex: number = 0;
 
   private consecutiveBounces: number = 0;
   private killStreak: number = 0;
@@ -105,7 +104,7 @@ export class MainScene extends Phaser.Scene {
     sky.fillGradientStyle(0x1a0f2e, 0x1a0f2e, 0x0a1024, 0x0a1024, 1, 1, 1, 1);
     sky.fillRect(0, 0, w, h);
 
-    const moon = this.add.circle(650, 150, 80, 0xd03e3e, 0.9);
+    this.add.circle(650, 150, 80, 0xd03e3e, 0.9);
     const moonGlow = this.add.circle(650, 150, 100, 0xd03e3e, 0.4);
     
     this.tweens.add({
@@ -390,7 +389,8 @@ export class MainScene extends Phaser.Scene {
       finalXp *= killMult;
     }
 
-    finalXp = Math.floor(finalXp);
+    finalXp *= this.player.xpMult;
+    finalXp = Math.round(finalXp * 10) / 10;
     this.player.gainXp(finalXp);
 
     this.spawnFloatingText(textX, textY - 40, `+${finalXp} XP`, '#aaffaa');
@@ -431,7 +431,7 @@ export class MainScene extends Phaser.Scene {
       this.spawnFloatingText(monster.x, monster.y - 20, `-${roundedDmg}${isCrit ? ' CRIT!' : ''}`, color);
 
       let xpGained = killed ? monster.killXP : 1;
-      if (player.hasXpFromDamage) xpGained += roundedDmg / 2;
+      if (player.hasXpFromDamage) xpGained += roundedDmg / 1.5;
 
       this.awardXP(xpGained, killed, player.x, player.y);
 
@@ -458,12 +458,12 @@ export class MainScene extends Phaser.Scene {
         this.monsters.getChildren().forEach((c: any) => {
           const m = c as BaseMonster;
           if (m !== monster && Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y) <= aoeRadius) {
-            const aoeDmg = Math.round(player.getSpeedDamageMultiplier(cachedFallSpeed) * 10) / 10;
+            const aoeDmg = Math.round(player.damage * player.getSpeedDamageMultiplier(cachedFallSpeed) * 10) / 10;
             const aoeKilled = m.takeDamage(aoeDmg);
             this.spawnFloatingText(m.x, m.y - 20, `-${aoeDmg} AOE`, '#ff8800');
 
             let aoeXp = aoeKilled ? Math.max(1, m.killXP) : 0;
-            if (player.hasXpFromDamage) aoeXp += aoeDmg / 2;
+            if (player.hasXpFromDamage) aoeXp += aoeDmg / 1.5;
             if (aoeXp > 0) {
               this.awardXP(aoeXp, aoeKilled, m.x, m.y);
             }
@@ -479,7 +479,7 @@ export class MainScene extends Phaser.Scene {
       return;
     } else {
       const damage = monster.damage || 1;      
-      if (!player.isInvulnerable) this.spawnFloatingText(player.x, player.y - 20, `-${damage} HP`, '#ff4444');
+      if (!player.isInvulnerable) this.spawnFloatingText(player.x, player.y - 20, `-${Math.round(damage*player.defensiveDmgMult*10)/10} HP`, '#ff4444');
       player.takeDamage(damage);
       
       monster.die();

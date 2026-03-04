@@ -14,11 +14,12 @@ export class Player extends Phaser.GameObjects.Sprite {
 
     public damage: number = 1;
     public jumpForce: number = -800;
-    public speedLimit: number = 300;
+    public speedLimit: number = 250;
     public acceleration: number = 3000;
     public maxJumps: number = 1;
     public jumpsLeft: number = 1;
     public bounceBoost: number = -650;
+    public defensiveDmgMult: number = 1;
 
     public hasBloodthirst: boolean = false;
     public hasResetBounces: boolean = false;
@@ -28,10 +29,13 @@ export class Player extends Phaser.GameObjects.Sprite {
     public hasXpFromDamage: boolean = false;
     public hasGroundSlam: boolean = false;
     public xpReqFactor: number = 1;
+    public xpMult: number = 1;
     public hasSpeedDmgMult: boolean = false;
+    public hasFrostBite: boolean = false;
+    public hasLuckyShot: boolean = false;
 
     public isInvulnerable: boolean = false;
-    public pendingLevelUps: number = 0;
+    public pendingLevelUps: number = 1;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, 'player-idle');
@@ -100,14 +104,14 @@ export class Player extends Phaser.GameObjects.Sprite {
     takeDamage(amount: number): boolean {
         if (this.isInvulnerable) return false;
 
-        this.hp -= amount;
+        this.hp = Math.round((this.hp - amount*this.defensiveDmgMult) * 10) / 10;
         if (this.hp <= 0) {
             (this.scene as any).gameOver(this.totalXp);
             return true;
         }
         this.scene.cameras.main.shake(150, 0.015);
 
-        if (this.hasLongImmunity && Math.random() < 0.2) {
+        if (this.hasLongImmunity) {
             this.isInvulnerable = true;
 
             this.scene.tweens.add({
@@ -115,7 +119,7 @@ export class Player extends Phaser.GameObjects.Sprite {
                 alpha: 0.2,
                 duration: 100,
                 yoyo: true,
-                repeat: 15,
+                repeat: 5,
                 onComplete: () => {
                     this.alpha = 1;
                     this.isInvulnerable = false;
@@ -137,17 +141,18 @@ export class Player extends Phaser.GameObjects.Sprite {
         while (this.totalXp >= this.currentLevelStartXp + (this.baseNextLevelXp * this.xpReqFactor)) {
             this.currentLevelStartXp += (this.baseNextLevelXp * this.xpReqFactor);
             this.level++;
-            this.baseNextLevelXp = Math.floor(this.baseNextLevelXp * 1.3);
+            this.baseNextLevelXp = Math.floor(this.baseNextLevelXp * 1.2);
 
             this.scene.cameras.main.flash(250, 255, 255, 255);
 
             this.pendingLevelUps++;
+            if (this.hasLuckyShot && Math.random() < 0.25) this.pendingLevelUps++;
         }
     }
 
     getSpeedDamageMultiplier(fallSpeed: number): number {
         if (!this.hasSpeedDmgMult) return 1;
-        return 1 + (fallSpeed / 1500);
+        return 1 + (fallSpeed / 1000);
     }
 }
 
