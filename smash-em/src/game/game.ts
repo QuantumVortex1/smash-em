@@ -249,7 +249,7 @@ export class MainScene extends Phaser.Scene {
     this.highscore = parseInt(localStorage.getItem('smash_em_highscore') || '0', 10);
   }
 
-  update(time: number, delta: number) {
+  update(_time: number, delta: number) {
     if (this.physics.world.isPaused) return;
 
     this.gameTimeSeconds += delta / 1000;

@@ -54,7 +54,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
     this.hpBar.setDepth(10);
   }
 
-  update(time: number, delta: number) {
+  update(_time: number, delta: number) {
     if (this.hp <= 0 || !this.active) {
       this.hpBar.clear();
       return;
