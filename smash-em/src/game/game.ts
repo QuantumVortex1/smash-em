@@ -19,6 +19,12 @@ export class MainScene extends Phaser.Scene {
   private xpText!: Phaser.GameObjects.Text;
   private levelText!: Phaser.GameObjects.Text;
 
+  private statsTextLeft!: Phaser.GameObjects.Text;
+  private statsTextMid!: Phaser.GameObjects.Text;
+  private statsTextRight!: Phaser.GameObjects.Text;
+  private highscore: number = 0;
+  private lastUpgradeName: string = '-';
+  
   private consecutiveBounces: number = 0;
   private killStreak: number = 0;
   private lastKillTime: number = 0;
@@ -219,12 +225,27 @@ export class MainScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setScrollFactor(0);
 
+    const statStyle = {
+      fontSize: '12px',
+      fontFamily: 'Courier',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 2
+    };
+
+    this.statsTextLeft = this.add.text(20, 520, '', statStyle).setScrollFactor(0);
+    this.statsTextMid = this.add.text(300, 520, '', statStyle).setScrollFactor(0);
+    this.statsTextRight = this.add.text(580, 520, '', statStyle).setScrollFactor(0);
+
     this.uiContainer.add([
       hpBgBorder, xpBgBorder, 
       this.hpBarBg, this.hpBarFill, this.hpText, 
       this.xpBarBg, this.xpBarFill, this.xpText, 
-      this.levelText
+      this.levelText,
+      this.statsTextLeft, this.statsTextMid, this.statsTextRight
     ]);
+
+    this.highscore = parseInt(localStorage.getItem('smash_em_highscore') || '0', 10);
   }
 
   update(time: number, delta: number) {
@@ -270,6 +291,27 @@ export class MainScene extends Phaser.Scene {
     this.xpText.setText(`${Math.floor(this.player.totalXp)} / ${Math.floor(nextLevelReq)} XP`);
 
     this.levelText.setText(`Lvl ${this.player.level}`);
+
+    this.statsTextLeft.setText(
+      `ATTACK     : ${this.player.damage.toFixed(1)}\n` +
+      `CRIT-CHANCE: ${Math.round(this.player.critChance * 100)}% (x${this.player.critMultiplier})\n` +
+      `DMG TAKEN  : ${Math.round(this.player.defensiveDmgMult * 100)}%\n` +
+      `MAX JUMPS  : ${this.player.maxJumps}`
+    );
+
+    const s = this.gameTimeSeconds;
+    const phase = s < 45 ? 1 : s < 90 ? 2 : s < 150 ? 3 : s < 240 ? 4 : s < 360 ? 5 : 6;
+    
+    this.statsTextMid.setText(
+      `PHASE      : ${phase}\n` +
+      `SURVIVED   : ${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}\n` +
+      `HIGHSCORE  : ${this.highscore}\n` +
+      `PROGRESS   : ${this.highscore > 0 ? Math.min(100, Math.round((this.player.totalXp / this.highscore) * 100)) : 100}%`
+    );
+
+    this.statsTextRight.setText(
+      `LAST UPGRADE:\n> ${this.lastUpgradeName}`
+    );
   }
 
   public gameOver(finalScore: number) {
@@ -510,6 +552,8 @@ export class MainScene extends Phaser.Scene {
     const selectUpgrade = (index: number) => {
       if (!this.physics.world.isPaused) return;
       if (!upgrades[index]) return;
+      
+      this.lastUpgradeName = upgrades[index].name;
       upgrades[index].apply(this.player);
 
       this.input.keyboard?.off('keydown-ONE');
