@@ -295,7 +295,7 @@ export class MainScene extends Phaser.Scene {
 
     this.statsTextLeft.setText(
       `ATTACK     : ${this.player.damage.toFixed(1)}\n` +
-      `CRIT-CHANCE: ${Math.round(this.player.critChance * 100)}% (x${this.player.critMultiplier})\n` +
+      `CRIT-CHANCE: ${Math.round(this.player.critChance * 100)}% (x${this.player.critMultiplier.toFixed(1)})\n` +
       `DMG TAKEN  : ${Math.round(this.player.defensiveDmgMult * 100)}%\n` +
       `MAX JUMPS  : ${this.player.maxJumps}`
     );
