@@ -18,6 +18,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
   
   public hp: number;
+  public maxHp: number;
   public killXP: number;
   protected speed: number;
   public damage: number;
@@ -28,6 +29,7 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
   private preferredOffset: number = 0;
   private isFrozen: boolean = false;
   private frozenTime: number = 0;
+  private hpBar: Phaser.GameObjects.Graphics;
 
   constructor(config: MonsterConfig) {
     super(config.scene, config.x, config.y, config.textureKey);
@@ -41,15 +43,37 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
     
     this.textureKey = config.textureKey;
     this.hp = config.hp;
+    this.maxHp = config.hp;
     this.speed = config.speed;
     this.jumpForce = config.jumpForce;
     this.damage = config.damage;
     this.killXP = config.killXP;
     this.player = config.player;
+    
+    this.hpBar = this.scene.add.graphics();
+    this.hpBar.setDepth(10);
   }
 
   update(time: number, delta: number) {
-    if (this.hp <= 0 || !this.active) return;
+    if (this.hp <= 0 || !this.active) {
+      this.hpBar.clear();
+      return;
+    }
+
+    if (this.hp < this.maxHp) {
+      this.hpBar.clear();
+      const hpWidth = 30;
+      const xPos = this.x - hpWidth / 2;
+      const yPos = this.y - this.displayHeight / 2 - 10;
+      const hpPercent = Phaser.Math.Clamp(this.hp / this.maxHp, 0, 1);
+      
+      this.hpBar.fillStyle(0x000000, 0.5);
+      this.hpBar.fillRect(xPos, yPos, hpWidth, 3);
+      this.hpBar.fillStyle(0xff0000, 0.8);
+      this.hpBar.fillRect(xPos, yPos, hpWidth * hpPercent, 3);
+    } else {
+      this.hpBar.clear();
+    }
 
     const distanceX = this.player.x - this.x;
     const distanceY = this.player.y - this.y;
@@ -63,8 +87,11 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
         this.clearTint();
       } else {
         this.body.setVelocityX(0);
+        this.anims.pause();
         return;
       }
+    } else {
+       if(!this.anims.isPlaying) this.anims.resume();
     }
 
     if (!this.preferredOffset) this.preferredOffset = (80 + Math.random() * 100);
@@ -127,6 +154,8 @@ export class BaseMonster extends Phaser.GameObjects.Sprite {
   }
 
   die() {
+    this.hpBar.clear();
+    this.hpBar.destroy();
     this.setActive(false);
     this.setVisible(false);
     if (this.body) this.body.enable = false;

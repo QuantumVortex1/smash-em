@@ -150,6 +150,7 @@ export class MainScene extends Phaser.Scene {
             0x2c2640, 
             0.3
         );
+        cloud.setDepth(-5);
         
         const speed = Phaser.Math.FloatBetween(10, 25);
         const distance = startX + cloudW;
@@ -536,6 +537,7 @@ export class MainScene extends Phaser.Scene {
     const overlayGroup = this.add.group();
 
     const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setScrollFactor(0);
+    overlay.setDepth(100);
     overlay.setInteractive();
 
     const title = this.add.text(400, 150, 'LEVEL UP!', {
@@ -545,6 +547,7 @@ export class MainScene extends Phaser.Scene {
       stroke: '#000000',
       strokeThickness: 6
     }).setOrigin(0.5).setScrollFactor(0);
+    title.setDepth(100);
 
     overlayGroup.add(overlay);
     overlayGroup.add(title);
@@ -579,6 +582,7 @@ export class MainScene extends Phaser.Scene {
       const y = 350;
 
       const cardContainer = this.add.container(x, y).setScrollFactor(0);
+      cardContainer.setDepth(100);
 
       const borderColor = upgrade.rarity === 'rare' ? 0xffbb00 : upgrade.rarity === 'onetime' ? 0xaa22ff : 0xffffff;
 
