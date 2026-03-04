@@ -51,7 +51,7 @@ export class MenuScene extends Phaser.Scene {
     scorePanel.setStrokeStyle(4, 0x555555);
 
     if (this.finalScore) {
-      this.add.text(width / 2, height / 2 - 35, `Letzter Score: ${Math.floor(this.finalScore)}`, {
+      this.add.text(width / 2, height / 2 - 35, `Final Score: ${Math.floor(this.finalScore)}`, {
         fontSize: '24px',
         fontFamily: 'Arial',
         color: '#ffffff'
@@ -75,7 +75,7 @@ export class MenuScene extends Phaser.Scene {
     
     const playBtnShadow = this.add.rectangle(5, 5, 220, 70, 0x000000, 0.4);
 
-    const playText = this.add.text(0, 0, 'SPIELEN', {
+    const playText = this.add.text(0, 0, 'PLAY', {
       fontSize: '36px',
       fontFamily: 'Impact',
       color: '#ffffff',

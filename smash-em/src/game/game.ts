@@ -399,9 +399,10 @@ export class MainScene extends Phaser.Scene {
     if (s < 45) pool = [0, 0, 0, 0, 1];
     else if (s < 90) pool = [0, 0, 1, 1, 2];
     else if (s < 150) pool = [0, 1, 1, 2, 2, 3];
-    else if (s < 240) pool = [1, 1, 2, 2, 3, 4];
-    else if (s < 360) pool = [1, 2, 3, 3, 4, 5];
-    else pool = [2, 3, 4, 5, 5, 5];
+    else if (s < 240) pool = [1, 2, 2, 3, 3, 4];
+    else if (s < 360) pool = [1, 2, 3, 3, 4, 4, 5];
+    else if (s < 420) pool = [2, 3, 4, 5, 5, 5];
+    else pool = [3, 4, 5, 5, 5, 5];
 
     const chosenIndex = pool[Math.floor(Math.random() * pool.length)];
     const MonsterClass = MonsterTypes[chosenIndex];
@@ -612,7 +613,7 @@ export class MainScene extends Phaser.Scene {
         wordWrap: { width: 160 }
       }).setOrigin(0.5);
 
-      const hintText = this.add.text(0, 100, `Taste [ ${index + 1} ]`, {
+      const hintText = this.add.text(0, 100, `[ ${index + 1} ]`, {
         fontSize: '14px',
         color: '#888888',
         fontFamily: 'Arial',

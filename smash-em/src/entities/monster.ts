@@ -183,18 +183,18 @@ export class OchreJelly extends BaseMonster {
 
 export class DeathSlime extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'death-slime', speed: 150, jumpForce: -630, hp: 12, damage: 5, killXP: 16, player });
+    super({ scene, x, y, textureKey: 'death-slime', speed: 150, jumpForce: -650, hp: 15, damage: 5, killXP: 16, player });
   }
 }
 
 export class MurkySlaad extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'murky-slaad', speed: 180, jumpForce: -750, hp: 25, damage: 8, killXP: 25, player });
+    super({ scene, x, y, textureKey: 'murky-slaad', speed: 180, jumpForce: -800, hp: 30, damage: 15, killXP: 25, player });
   }
 }
 
 export class CrimsonSlaad extends BaseMonster {
   constructor(scene: Phaser.Scene, x: number, y: number, player: Player) {
-    super({ scene, x, y, textureKey: 'crimson-slaad', speed: 200, jumpForce: -900, hp: 40, damage: 15, killXP: 35, player });
+    super({ scene, x, y, textureKey: 'crimson-slaad', speed: 250, jumpForce: -950, hp: 55, damage: 30, killXP: 35, player });
   }
 }
